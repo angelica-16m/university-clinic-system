@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Registration</title>
+    <style>
+        :root { 
+            --bsu-red: #8B0000; 
+            --disabled: #a5a5a5; 
+            --success: #28a745; 
+            --error-red: #ff4d4d;
+            --weak-yellow: #ffc107;
+            --back-gray: #6c757d;
+        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .reg-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 440px; text-align: center; border-top: 6px solid var(--bsu-red); }
+        .logo { width: 100px; margin-bottom: 15px; }
+        h2 { color: var(--bsu-red); margin: 0 0 10px 0; }
+        .directions { font-size: 0.85rem; color: #555; margin-bottom: 20px; line-height: 1.4; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        .field-label { display: block; text-align: left; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 2px; margin-top: 10px; }
+        
+        input, select { 
+            width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; 
+            box-sizing: border-box; font-size: 0.95rem; transition: border-color 0.3s;
+        }
+
+        input.invalid-format { border-color: var(--error-red); background-color: #fffafa; }
+        .uppercase-input { text-transform: uppercase; }
+
+        .strength-container { text-align: left; margin-top: -8px; margin-bottom: 10px; }
+        .strength-bar { height: 5px; width: 100%; background: #eee; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .strength-fill { height: 100%; width: 0%; transition: width 0.3s, background-color 0.3s; }
+        #strength-label { font-size: 0.75rem; font-weight: bold; }
+
+        button { 
+            width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; 
+            cursor: pointer; transition: 0.3s; margin-top: 15px; color: white;
+            background-color: var(--disabled);
+        }
+
+        .btn-back { background-color: var(--back-gray); margin-top: 10px; }
+        .btn-back:hover { background-color: #5a6268; }
+
+        button.ready-step1 { background-color: var(--bsu-red) !important; }
+        button.ready-next { background-color: var(--success) !important; }
+        button:disabled { cursor: not-allowed; opacity: 0.7; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .login-link { display: inline-block; margin-top: 15px; font-size: 0.85rem; color: #555; text-decoration: none; transition: 0.3s; }
+        .login-link:hover { color: var(--bsu-red); text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="reg-card">
+    <img src="https://uploads.onecompiler.io/43gf84yfy/44nu2n4px/bsu.logo.png" alt="BSU Logo" class="logo">
+    <h2>Clinic Registration</h2>
+
+    <form id="registrationForm" method="POST" action="/register">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div id="error-container" style="display: block; background: #f8d7da; color: #721c24; 
+                      padding: 12px; border-radius: 8px; margin-bottom: 20px; 
+                      font-size: 0.85rem; border: 1px solid #f5c6cb; font-weight: 500; text-align: center;">
+            ⚠️ {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+        
+        <div id="step1" class="step active">
+            <p class="directions">Please fill up the fields using your official Red Spartan credentials.</p>
+            <label class="field-label">SR-Code:</label>
+            <input type="text" id="sr_code" name="sr_code" placeholder="e.g. 20-12345" oninput="validateStep1()" required>
+            
+            <label class="field-label">BSU Email Address:</label>
+            <input type="email" id="email" placeholder="e.g. 20-12345@g.batstate-u.edu.ph" oninput="validateStep1()" required>
+            
+            <button type="button" id="btn1" disabled onclick="nextStep(2)">Next</button>
+            <br>
+            <a href="/login" class="login-link">Already have an account? <b>Log in</b></a>
+        </div>
+
+        <div id="step2" class="step">
+            <p class="directions">Provide your personal information for your medical record.</p>
+            <label class="field-label">Full Name</label>
+            <input type="text" id="fullname" name="fullname" class="name-input" placeholder="Dela Cruz, Juan A." oninput="validateStep2()" required>
+            
+            <label class="field-label">College / Department</label>
+            <select id="college" name="college" onchange="updatePrograms(); validateStep2();" required>
+                <option value="">Select College</option>
+                <option value="Engineering">College of Engineering (COE)</option>
+                <option value="CICS">College of Informatics and Computing Sciences (CICS)</option>
+                <option value="CET">College of Engineering Technology (CET)</option>
+                <option value="CAFAD">College of Architecture, Fine Arts, and Design (CAFAD)</option>
+            </select>
+
+            <label class="field-label">Program / Course</label>
+            <select id="program" name="program" onchange="validateStep2()" required>
+                <option value="">Select Program</option>
+            </select>
+
+            <label class="field-label">Year Level</label>
+            <select id="year" name="year" onchange="validateStep2()" required>
+                <option value="">Select Year</option>
+                <option value="1st">1st Year</option>
+                <option value="2nd">2nd Year</option>
+                <option value="3rd">3rd Year</option>
+                <option value="4th">4th Year</option>
+                <option value="5th">5th Year</option>
+            </select>
+
+            <label class="field-label">Blood Type (Optional)</label>
+            <input type="text" id="bloodtype" name="blood_type" placeholder="e.g. O+, A-, B+">
+            
+            <button type="button" id="btn2" disabled onclick="nextStep(3)">Next</button>
+            <button type="button" class="btn-back" onclick="nextStep(1)">Back</button>
+        </div>
+
+        <div id="step3" class="step">
+            <p class="directions">Create a secure password to protect your account privacy.</p>
+            <label class="field-label">Create Password</label>
+            <input type="password" id="p1" name="password" placeholder="Enter password" oninput="checkStrength()" required>
+            
+            <div class="strength-container">
+                <span id="strength-label">Password Level: None</span>
+                <div class="strength-bar"><div id="strength-fill" class="strength-fill"></div></div>
+            </div>
+
+            <label class="field-label">Confirm Password</label>
+            <input type="password" id="p2" placeholder="Re-type password" oninput="checkStrength()" required>
+            
+            <button type="submit" id="finalBtn" disabled>Finish and Register</button>
+            <button type="button" class="btn-back" onclick="nextStep(2)">Back</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function nextStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n).classList.add('active');
+    }
+
+    function validateStep1() {
+        const sr = document.getElementById('sr_code').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const btn = document.getElementById('btn1');
+        const srPattern = /^\d{2}-\d{5}$/; 
+        if (srPattern.test(sr) && email === (sr + "@g.batstate-u.edu.ph")) {
+            btn.disabled = false; btn.classList.add('ready-step1');
+        } else {
+            btn.disabled = true; btn.classList.remove('ready-step1');
+        }
+    }
+
+    function validateStep2() {
+        const nameInput = document.getElementById('fullname');
+        const nameVal = nameInput.value.trim();
+        const college = document.getElementById('college').value;
+        const program = document.getElementById('program').value;
+        const year = document.getElementById('year').value;
+        const btn = document.getElementById('btn2');
+        const hasComma = nameVal.includes(',');
+        
+        if (nameVal.length > 0 && !hasComma) { nameInput.classList.add('invalid-format'); } 
+        else { nameInput.classList.remove('invalid-format'); }
+
+        if (hasComma && nameVal.split(',')[1].trim().length > 0 && college && program && year) {
+            btn.disabled = false; btn.classList.add('ready-next');
+        } else {
+            btn.disabled = true; btn.classList.remove('ready-next');
+        }
+    }
+
+    function updatePrograms() {
+        const college = document.getElementById('college').value;
+        const progSelect = document.getElementById('program');
+        progSelect.innerHTML = '<option value="">Select Program</option>';
+        const list = {
+            'Engineering': ['Aerospace Engineering', 'Biomedical Engineering', 'Chemical Engineering', 'Civil Engineering', 'Computer Engineering', 'Electrical Engineering', 'Electronics Engineering', 'Food Engineering', 'Geodetic Engineering', 'Industrial Engineering', 'Instrumentation and Control Engineering', 'Mechanical Engineering', 'Mechatronics Engineering (MEXE)', 'Naval Architecture and Marine Engineering (NAME)', 'Petroleum Engineering', 'Sanitary Engineering'].sort(),
+            'CICS': ['Computer Science', 'Information Technology'].sort(),
+            'CET': ['Automotive Engineering Technology', 'Civil Engineering Technology', 'Computer Engineering Technology', 'Electrical Engineering Technology', 'Electronics Engineering Technology', 'Mechanical Engineering Technology'].sort(),
+            'CAFAD': ['Architecture', 'Fine Arts', 'Interior Design'].sort()
+        };
+        if (list[college]) {
+            list[college].forEach(p => { let o = document.createElement('option'); o.value = p; o.text = p; progSelect.add(o); });
+        }
+    }
+
+    function checkStrength() {
+        const p1 = document.getElementById('p1').value;
+        const p2 = document.getElementById('p2').value;
+        const label = document.getElementById('strength-label');
+        const fill = document.getElementById('strength-fill');
+        const btn = document.getElementById('finalBtn');
+
+        let strength = 0;
+        if (p1.length >= 6) strength = 1;
+        if (p1.length >= 8 && /[A-Z]/.test(p1) && /[0-9]/.test(p1)) strength = 2;
+        if (p1.length >= 10 && /[^A-Za-z0-9]/.test(p1)) strength = 3;
+
+        if (p1 === "") {
+            label.innerText = "Password Level: None"; fill.style.width = "0%";
+        } else if (strength === 1) {
+            label.innerText = "Password Level: Bad"; label.style.color = "var(--error-red)";
+            fill.style.width = "33%"; fill.style.backgroundColor = "var(--error-red)";
+        } else if (strength === 2) {
+            label.innerText = "Password Level: Weak"; label.style.color = "var(--weak-yellow)";
+            fill.style.width = "66%"; fill.style.backgroundColor = "var(--weak-yellow)";
+        } else if (strength === 3) {
+            label.innerText = "Password Level: Strong"; label.style.color = "var(--success)";
+            fill.style.width = "100%"; fill.style.backgroundColor = "var(--success)";
+        }
+
+        // Enable button only if password is strong AND matches
+        if (strength === 3 && p1 === p2) {
+            btn.disabled = false; btn.classList.add('ready-next');
+        } else {
+            btn.disabled = true; btn.classList.remove('ready-next');
+        }
+    }
+</script>
+</body>
+</html>

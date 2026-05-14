@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Health Portal - BSU</title>
+    <style>
+        :root { 
+            --bsu-red: #8B0000; 
+            --light-gray: #f4f7f6;
+            --border: #eee;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: var(--light-gray); 
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        .dashboard-container { 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 750px; 
+            text-align: left; 
+            border-top: 6px solid var(--bsu-red); 
+            box-sizing: border-box;
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { width: 100px; margin-bottom: 15px; }
+        h2 { color: var(--bsu-red); text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+        .subtitle { color: #666; font-size: 0.95rem; margin-top: 5px; display: block; }
+
+        /* Forces section headers to take up a full row outside the grid */
+        .section-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            color: var(--bsu-red);
+            font-weight: bold;
+            border-left: 5px solid var(--bsu-red);
+            margin: 30px 0 15px 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Responsive Grid Logic */
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px 40px; 
+            width: 100%;
+        }
+
+        .info-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .full-width { grid-column: span 2; }
+        
+        .label { display: block; font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; }
+        .value { display: block; font-size: 1rem; color: #333; margin-top: 2px; text-transform: uppercase; }
+
+        .log-box {
+            background: #fffcf5;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .footer { margin-top: 40px; text-align: center; border-top: 1px solid var(--border); padding-top: 20px; }
+        .logout-link {
+            text-decoration: none;
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="header">
+        <img src="https://uploads.onecompiler.io/43gf84yfy/44nu2n4px/bsu.logo.png" alt="BSU Logo" class="logo">
+        <h2>Student Health Portal</h2>
+        <span class="subtitle">Official Medical Record - BatStateU Clinic</span>
+    </div>
+
+    <div class="section-header">Personal Information</div>
+    <div class="info-grid">
+        <div class="info-row"><span class="label">Full Name</span><span class="value">{{ name }}</span></div>
+        <div class="info-row"><span class="label">SR-Code</span><span class="value">{{ sr }}</span></div>
+        <div class="info-row"><span class="label">Birthdate</span><span class="value">{{ bday or '---' }}</span></div>
+        <div class="info-row"><span class="label">Year Level</span><span class="value">{{ year }}</span></div>
+        <div class="info-row full-width"><span class="label">Home Address</span><span class="value">{{ addr or '---' }}</span></div>
+    </div>
+
+    <div class="section-header">Clinical & Emergency Profile</div>
+    <div class="info-grid">
+        <div class="info-row"><span class="label">Blood Type</span><span class="value">{{ blood or 'N/A' }}</span></div>
+        <div class="info-row"><span class="label">Parent Contact</span><span class="value">{{ contact or '---' }}</span></div>
+        <div class="info-row"><span class="label">Known Allergies</span><span class="value" style="color: #d9534f; font-weight: 600;">{{ allergies or 'None' }}</span></div>
+        <div class="info-row"><span class="label">Referral Status</span><span class="value">{{ referral or 'Clear' }}</span></div>
+    </div>
+
+    <div class="section-header">Clinic Visit History</div>
+    <div class="log-box">
+        {% if log %}
+            {{ log | safe }}
+        {% else %}
+            No recent clinic visits or medical entries recorded.
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <a href="/logout" class="logout-link">LOGOUT FROM SYSTEM</a>
+    </div>
+</div>
+
+</body>
+</html>
